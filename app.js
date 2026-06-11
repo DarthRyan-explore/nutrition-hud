@@ -229,17 +229,21 @@ function checkDateTransition() {
       }
     }
     
-    // Reset daily logs
+    // Reset daily logs & diagnostics for the new day
     state.currentDate = localToday;
     state.logs = [];
-    state.diagnostics.workoutDetails = "";
+    state.diagnostics = {
+      weight: null,
+      workoutTag: "Rest",
+      workoutDetails: ""
+    };
     
     saveStateToStorage();
     sfx.play('beep');
     
     // Reset inputs in DOM
     const inputWeight = document.getElementById("input-weight");
-    if (inputWeight) inputWeight.value = state.diagnostics.weight || "";
+    if (inputWeight) inputWeight.value = "";
     
     const selectWorkout = document.getElementById("select-workout");
     if (selectWorkout) selectWorkout.value = "Rest";
@@ -936,47 +940,10 @@ Respond ONLY with the JSON. Do not write any explanations or other text.`;
     console.error("[GEMINI API] Failed: ", err);
     sfx.play('error');
     
-    // Try to parse locally as a fallback so the user doesn't lose their inputs!
-    try {
-      const localItems = parseIngestionLocally(inputText);
-      if (localItems && localItems.length > 0) {
-        const now = new Date();
-        const timeStr = String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
-        
-        localItems.forEach(item => {
-          const newMeal = {
-            id: 'meal_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-            time: timeStr,
-            name: item.name,
-            calories: item.calories,
-            protein: item.protein
-          };
-          state.logs.push(newMeal);
-        });
-        
-        saveStateToStorage();
-        renderAll();
-        triggerSheetsSync();
-        sfx.play('success');
-        
-        document.getElementById("textarea-intake").value = "";
-        
-        if (terminalScreen) {
-          terminalScreen.className = "terminal-text text-amber";
-          terminalScreen.innerText = `[AI OFFLINE - LOCAL EXTRACTION ACTIVE]\n\nCognitive uplink failed (${err.message || err.toString()}).\nLocal parser processed ${localItems.length} item(s).\n\nPlease verify calorie/protein values in the log.`;
-        }
-        
-        setPortraitState('amber');
-        return;
-      }
-    } catch (localErr) {
-      console.error("Local fallback parser failed:", localErr);
-    }
-    
     if (terminalScreen) {
       const errMsg = err.message || err.toString() || "Unknown communication error";
       terminalScreen.className = "terminal-text text-crimson";
-      terminalScreen.innerText = `[PARSING ERROR]\nCOGNITIVE UPLINK FAILED.\n\nError details:\n${errMsg}\n\nPlease check your Gemini API key in Settings.`;
+      terminalScreen.innerText = `[UPLINK FAILED]\nCOGNITIVE UPLINK ERROR.\n\nDetails: ${errMsg}\n\nConnection failed. Please check your network and API key, and try again later.`;
     }
     setPortraitState('crimson');
   })
@@ -1116,144 +1083,148 @@ function renderGauges() {
 }
 
 function renderMealList() {
+  const workoutContainer = document.getElementById("workout-container");
   const mealList = document.getElementById("meal-list");
-  if (!mealList) return;
-  mealList.innerHTML = "";
   
   const hasMeals = state.logs.length > 0;
   const hasWorkout = (state.diagnostics.workoutTag && state.diagnostics.workoutTag !== "Rest") || state.diagnostics.weight || state.diagnostics.workoutDetails;
   
-  // 1. Prepend active workout/training telemetry card if present, OR show a dashed prompt box if missing
-  if (hasWorkout) {
-    const workoutItem = document.createElement("div");
-    workoutItem.className = "inventory-item workout-log-item";
-    workoutItem.style.border = "1px solid var(--neon-amber)";
-    workoutItem.style.background = "rgba(255, 153, 0, 0.08)";
-    workoutItem.style.boxShadow = "inset 0 0 10px rgba(255, 153, 0, 0.05)";
-    
-    const weightText = state.diagnostics.weight ? `Body Weight: ${state.diagnostics.weight} lbs` : "Weight: not logged";
-    const notesText = state.diagnostics.workoutDetails ? state.diagnostics.workoutDetails : "No exercise notes";
-    const routineText = state.diagnostics.workoutTag || "Rest Day";
-    
-    workoutItem.innerHTML = `
-      <div class="item-left">
-        <span class="item-name text-orange" style="font-weight: 700;">⚡ TRAINING ACTIVE: ${routineText}</span>
-        <span class="item-time" style="font-size: 0.72rem; color: var(--text-secondary); line-height: 1.4; display: block; margin-top: 4px;">
-          ${weightText} &nbsp;//&nbsp; ${notesText}
+  // 1. Render Workout/Training status card or prompt
+  if (workoutContainer) {
+    workoutContainer.innerHTML = "";
+    if (hasWorkout) {
+      const workoutItem = document.createElement("div");
+      workoutItem.className = "inventory-item workout-log-item";
+      workoutItem.style.border = "1px solid var(--neon-amber)";
+      workoutItem.style.background = "rgba(255, 153, 0, 0.08)";
+      workoutItem.style.boxShadow = "inset 0 0 10px rgba(255, 153, 0, 0.05)";
+      
+      const weightText = state.diagnostics.weight ? `Body Weight: ${state.diagnostics.weight} lbs` : "Weight: not logged";
+      const notesText = state.diagnostics.workoutDetails ? state.diagnostics.workoutDetails : "No exercise notes";
+      const routineText = state.diagnostics.workoutTag || "Rest Day";
+      
+      workoutItem.innerHTML = `
+        <div class="item-left">
+          <span class="item-name text-orange" style="font-weight: 700;">⚡ TRAINING ACTIVE: ${routineText}</span>
+          <span class="item-time" style="font-size: 0.72rem; color: var(--text-secondary); line-height: 1.4; display: block; margin-top: 4px;">
+            ${weightText} &nbsp;//&nbsp; ${notesText}
+          </span>
+        </div>
+        <div class="item-right">
+          <button class="btn-item-action btn-workout-edit-inline" style="border-color: var(--neon-amber); color: var(--neon-amber);">EDIT LOG</button>
+        </div>
+      `;
+      workoutContainer.appendChild(workoutItem);
+      
+      const btnWorkoutEdit = workoutItem.querySelector(".btn-workout-edit-inline");
+      if (btnWorkoutEdit) {
+        btnWorkoutEdit.addEventListener("click", () => {
+          sfx.play('beep');
+          const diagDialog = document.getElementById("dialog-diagnostics");
+          if (diagDialog) diagDialog.showModal();
+        });
+      }
+    } else {
+      // Show dashed prompt box to encourage logging workouts!
+      const promptItem = document.createElement("div");
+      promptItem.className = "inventory-item workout-prompt-item";
+      promptItem.style.border = "1px dashed rgba(255, 153, 0, 0.35)";
+      promptItem.style.background = "rgba(255, 153, 0, 0.02)";
+      promptItem.style.display = "flex";
+      promptItem.style.justifyContent = "center";
+      promptItem.style.cursor = "pointer";
+      promptItem.style.padding = "10px";
+      
+      promptItem.innerHTML = `
+        <span class="text-orange" style="font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px;">
+          [ + LOG WORKOUT & BODY WEIGHT ]
         </span>
-      </div>
-      <div class="item-right">
-        <button class="btn-item-action btn-workout-edit-inline" style="border-color: var(--neon-amber); color: var(--neon-amber);">EDIT LOG</button>
-      </div>
-    `;
-    mealList.appendChild(workoutItem);
-    
-    const btnWorkoutEdit = workoutItem.querySelector(".btn-workout-edit-inline");
-    if (btnWorkoutEdit) {
-      btnWorkoutEdit.addEventListener("click", () => {
+      `;
+      workoutContainer.appendChild(promptItem);
+      
+      promptItem.addEventListener("click", () => {
         sfx.play('beep');
         const diagDialog = document.getElementById("dialog-diagnostics");
         if (diagDialog) diagDialog.showModal();
       });
     }
-  } else {
-    // Show dashed prompt box to encourage logging workouts!
-    const promptItem = document.createElement("div");
-    promptItem.className = "inventory-item workout-prompt-item";
-    promptItem.style.border = "1px dashed rgba(255, 153, 0, 0.35)";
-    promptItem.style.background = "rgba(255, 153, 0, 0.02)";
-    promptItem.style.display = "flex";
-    promptItem.style.justifyContent = "center";
-    promptItem.style.cursor = "pointer";
-    promptItem.style.padding = "10px";
-    
-    promptItem.innerHTML = `
-      <span class="text-orange" style="font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px;">
-        [ + LOG WORKOUT & BODY WEIGHT ]
-      </span>
-    `;
-    mealList.appendChild(promptItem);
-    
-    promptItem.addEventListener("click", () => {
-      sfx.play('beep');
-      const diagDialog = document.getElementById("dialog-diagnostics");
-      if (diagDialog) diagDialog.showModal();
-    });
   }
   
-  // 2. Append meal logs
-  if (hasMeals) {
-    const sortedLogs = [...state.logs].reverse();
-    sortedLogs.forEach(meal => {
-      const item = document.createElement("div");
-      item.className = "inventory-item";
-      
-      item.innerHTML = `
-        <div class="item-left">
-          <span class="item-name">${meal.name}</span>
-          <span class="item-time">Logged at: ${meal.time}</span>
-        </div>
-        <div class="item-right">
-          <div class="item-stats">
-            <div class="item-nutrition">
-              <span class="item-pro-highlight">${meal.protein}g</span> Protein &nbsp;//&nbsp; ${meal.calories} Calories
+  // 2. Render Meal Logs
+  if (mealList) {
+    mealList.innerHTML = "";
+    if (hasMeals) {
+      const sortedLogs = [...state.logs].reverse();
+      sortedLogs.forEach(meal => {
+        const item = document.createElement("div");
+        item.className = "inventory-item";
+        
+        item.innerHTML = `
+          <div class="item-left">
+            <span class="item-name">${meal.name}</span>
+            <span class="item-time">Logged at: ${meal.time}</span>
+          </div>
+          <div class="item-right">
+            <div class="item-stats">
+              <div class="item-nutrition">
+                <span class="item-pro-highlight">${meal.protein}g</span> Protein &nbsp;//&nbsp; ${meal.calories} Calories
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="btn-item-action btn-item-edit" data-id="${meal.id}">EDIT</button>
+              <button class="btn-item-action btn-item-delete" data-id="${meal.id}">&times;</button>
             </div>
           </div>
-          <div class="item-actions">
-            <button class="btn-item-action btn-item-edit" data-id="${meal.id}">EDIT</button>
-            <button class="btn-item-action btn-item-delete" data-id="${meal.id}">&times;</button>
-          </div>
-        </div>
-      `;
-      mealList.appendChild(item);
-    });
-  } else {
-    // If no meals, append an empty message row below the workout prompt
-    const emptyRow = document.createElement("div");
-    emptyRow.className = "empty-inventory-message";
-    emptyRow.innerText = "No food logged today.";
-    mealList.appendChild(emptyRow);
+        `;
+        mealList.appendChild(item);
+      });
+      
+      // Listeners
+      document.querySelectorAll(".btn-item-delete").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const id = e.target.dataset.id;
+          sfx.play('click');
+          state.logs = state.logs.filter(l => l.id !== id);
+          saveStateToStorage();
+          renderAll();
+          triggerSheetsSync();
+        });
+      });
+      
+      document.querySelectorAll(".btn-item-edit").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const id = e.target.dataset.id;
+          sfx.play('click');
+          const meal = state.logs.find(l => l.id === id);
+          if (meal) {
+            const newName = prompt("Edit Biomass Name:", meal.name);
+            if (newName === null) return;
+            
+            const newCalories = prompt("Edit Calories (kcal):", meal.calories);
+            if (newCalories === null) return;
+            
+            const newProtein = prompt("Edit Protein (g):", meal.protein);
+            if (newProtein === null) return;
+            
+            meal.name = newName.trim() || meal.name;
+            meal.calories = Math.round(Number(newCalories)) || 0;
+            meal.protein = Math.round(Number(newProtein)) || 0;
+            
+            learnFood(meal.name, meal.calories, meal.protein);
+            
+            saveStateToStorage();
+            renderAll();
+            triggerSheetsSync();
+          }
+        });
+      });
+    } else {
+      const emptyRow = document.createElement("div");
+      emptyRow.className = "empty-inventory-message";
+      emptyRow.innerText = "No food logged today.";
+      mealList.appendChild(emptyRow);
+    }
   }
-  
-  // Listeners
-  document.querySelectorAll(".btn-item-delete").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const id = e.target.dataset.id;
-      sfx.play('click');
-      state.logs = state.logs.filter(l => l.id !== id);
-      saveStateToStorage();
-      renderAll();
-      triggerSheetsSync();
-    });
-  });
-  
-  document.querySelectorAll(".btn-item-edit").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const id = e.target.dataset.id;
-      sfx.play('click');
-      const meal = state.logs.find(l => l.id === id);
-      if (meal) {
-        const newName = prompt("Edit Biomass Name:", meal.name);
-        if (newName === null) return;
-        
-        const newCalories = prompt("Edit Calories (kcal):", meal.calories);
-        if (newCalories === null) return;
-        
-        const newProtein = prompt("Edit Protein (g):", meal.protein);
-        if (newProtein === null) return;
-        
-        meal.name = newName.trim() || meal.name;
-        meal.calories = Math.round(Number(newCalories)) || 0;
-        meal.protein = Math.round(Number(newProtein)) || 0;
-        
-        learnFood(meal.name, meal.calories, meal.protein);
-        
-        saveStateToStorage();
-        renderAll();
-        triggerSheetsSync();
-      }
-    });
-  });
 }
 
 function renderDictionaryManager() {

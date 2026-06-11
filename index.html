@@ -170,16 +170,28 @@
         </div>
       </section>
 
-      <!-- COLUMN 3: Inventory Log -->
+      <!-- COLUMN 3: Telemetry & Logs -->
       <section class="hud-card inventory-panel">
         <div class="card-header">
-          <h2 class="card-title"><span class="tech-bracket">[</span> TODAY'S FOOD LOG <span class="tech-bracket">]</span></h2>
+          <h2 class="card-title"><span class="tech-bracket">[</span> DAILY LOGS & STATUS <span class="tech-bracket">]</span></h2>
           <div class="card-header-line"></div>
         </div>
         <div class="card-body inventory-scroller">
-          <div id="meal-list" class="inventory-list">
-            <!-- Meal items loaded via JS -->
-            <div class="empty-inventory-message">NO FOOD LOGGED YET today.</div>
+          <!-- Sub-section 1: Training Status -->
+          <div class="inventory-section" style="margin-bottom: 20px;">
+            <h3 class="hud-section-header text-orange"><span class="tech-bracket">[</span> TRAINING STATUS <span class="tech-bracket">]</span></h3>
+            <div id="workout-container" class="inventory-list">
+              <!-- Workout status card or prompt loaded via JS -->
+            </div>
+          </div>
+          
+          <!-- Sub-section 2: Food Ingestion Log -->
+          <div class="inventory-section">
+            <h3 class="hud-section-header text-cyan"><span class="tech-bracket">[</span> FOOD INGESTION LOG <span class="tech-bracket">]</span></h3>
+            <div id="meal-list" class="inventory-list">
+              <!-- Meal items loaded via JS -->
+              <div class="empty-inventory-message">NO FOOD LOGGED YET today.</div>
+            </div>
           </div>
         </div>
       </section>

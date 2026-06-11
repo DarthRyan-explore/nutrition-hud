@@ -982,9 +982,30 @@ input.hud-input:focus {
 /* COLUMN 4: Ingested Inventory Log */
 .inventory-scroller {
   overflow-y: auto;
-  max-height: 240px;
+  max-height: 380px;
   padding: 8px 16px !important;
   -webkit-overflow-scrolling: touch;
+}
+
+.hud-section-header {
+  font-family: var(--font-hud-header);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 4px;
+}
+.hud-section-header.text-orange {
+  color: var(--neon-amber);
+  text-shadow: 0 0 4px rgba(255, 153, 0, 0.35);
+  border-color: rgba(255, 153, 0, 0.15);
+}
+.hud-section-header.text-cyan {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 4px rgba(0, 255, 213, 0.35);
+  border-color: rgba(0, 255, 213, 0.15);
 }
 
 .inventory-list {
