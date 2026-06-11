@@ -551,7 +551,7 @@ Guidelines:
 3. Keep the tone very sarcastic, sci-fi, and military-protocol style.
 4. Keep the message short (2 to 4 sentences max). Do not include any greeting or conversational filler like "Here is your advice". Respond ONLY with the advisor's snarky message.`;
 
-  const requestUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+  const requestUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   
   try {
     const response = await fetch(requestUrl, {
@@ -863,7 +863,7 @@ Output a JSON object matching this schema:
 
 Respond ONLY with the JSON. Do not write any explanations or other text.`;
 
-  const requestUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+  const requestUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   
   fetch(requestUrl, {
     method: "POST",
