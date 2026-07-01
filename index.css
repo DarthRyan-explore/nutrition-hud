@@ -193,16 +193,17 @@ body::before {
 
 .hud-glitch-title {
   font-family: var(--font-hud-header);
-  font-size: 2.6rem; /* much more prominent! */
+  font-size: 3.5rem; /* Massive, wide logo text! */
   font-weight: 900;
   background: linear-gradient(135deg, #00f3ff 20%, #ffffff 50%, #00f3ff 80%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(2px 2px 0px #000000) drop-shadow(-2px -2px 0px #000000) drop-shadow(4px 4px 0px rgba(0, 243, 255, 0.4));
-  letter-spacing: 3px;
+  filter: drop-shadow(2px 2px 0px #000000) drop-shadow(-2px -2px 0px #000000) drop-shadow(5px 5px 0px rgba(0, 243, 255, 0.45));
+  letter-spacing: 5px; /* Wider spacing */
   transform: skewX(-12deg);
   text-transform: uppercase;
   margin: 0;
+  text-align: center;
 }
 
 .hud-tagline {
@@ -1567,8 +1568,12 @@ input.hud-input:focus {
   pointer-events: none;
   z-index: 3;
   mix-blend-mode: color;
-  opacity: 0.28;
+  opacity: 0.05; /* lightened blue filter overlay */
   background: var(--neon-cyan);
+}
+
+.onboarding-portrait-container .coach-portrait-image {
+  filter: brightness(1.25) contrast(1.05) saturate(1.1) drop-shadow(0 0 4px rgba(0, 243, 255, 0.3));
 }
 
 .onboarding-portrait-container::after {
@@ -1915,7 +1920,7 @@ input.hud-input:focus {
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.88rem;
   font-weight: 800;
-  color: #000000;
+  color: #000000 !important;
   line-height: 1.45;
   text-transform: uppercase;
 }
@@ -2006,6 +2011,10 @@ input.hud-input:focus {
 
 /* Mobile responsive fixes for bubble and onboarding */
 @media (max-width: 580px) {
+  .hud-glitch-title {
+    font-size: 2.1rem !important;
+    letter-spacing: 2px !important;
+  }
   .onboarding-body-layout {
     flex-direction: column !important;
     align-items: center !important;

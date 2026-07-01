@@ -1126,7 +1126,7 @@ function updateOnboardingStep() {
       
     case 5:
       setOnboardingPortraitState("green");
-      dialogueText.innerText = "SYSTEM COGNITIVE LINKS FULLY CONNECTED!\n\nTHE COGNITIVE CIRCUITS ARE ONLINE. YOU CAN NOW MEAL-LOG IN THE INPUT BOX, DEFINE TRAINING DECK ACTIVITIES IN THE TRAINING CARD, OR TAP MY FACE AT ANY TIME FOR DYNAMIC EVALUATIONS.\n\nCOMMENCING MAIN SCREEN GUIDED WALKTHROUGH DIRECTIVE... CLICK COMPLETE TO BEGIN OR DISMISS ME.";
+      dialogueText.innerText = "SYSTEM COGNITIVE LINKS FULLY ESTABLISHED!\n\nPRO-TIP, MEATBAG: ONCE YOU ACCUMULATE LOG DATA, EXPORT YOUR GOOGLE SHEET AND LOAD IT INTO NOTEBOOK LM. IT WILL PARSE YOUR PROGRESS, RANT ABOUT HOW AMAZINGLY STRONG YOU ARE, AND MOCK YOU UNTIL YOU STOP EATING SO MANY SALT AND VINEGAR CHIPS.\n\nCOMMENCING MAIN SCREEN GUIDED WALKTHROUGH DIRECTIVE... CLICK COMPLETE TO BEGIN.";
       const completeDiv = document.createElement("div");
       completeDiv.className = "empty-inventory-message";
       completeDiv.style.padding = "5px 0";
@@ -1627,7 +1627,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (inputWeight) inputWeight.value = state.diagnostics.weight || "";
     
     const selectWorkout = document.getElementById("select-workout");
-    if (selectWorkout) selectWorkout.value = state.diagnostics.workoutTag || "Rest";
+    const customGroup = document.getElementById("custom-workout-group");
+    const customInput = document.getElementById("input-custom-workout");
+    
+    if (selectWorkout) {
+      const standardOptions = ["Rest", "Day A", "Day B", "Day C", "Day D", "Day E"];
+      const currentTag = state.diagnostics.workoutTag || "Rest";
+      
+      if (standardOptions.includes(currentTag)) {
+        selectWorkout.value = currentTag;
+        if (customGroup) customGroup.classList.add("hidden");
+      } else {
+        selectWorkout.value = "Other";
+        if (customInput) customInput.value = currentTag;
+        if (customGroup) customGroup.classList.remove("hidden");
+      }
+    }
     
     const textareaWorkout = document.getElementById("textarea-workout");
     if (textareaWorkout) textareaWorkout.value = state.diagnostics.workoutDetails || "";
@@ -1635,6 +1650,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const diagDialog = document.getElementById("dialog-diagnostics");
     if (diagDialog) diagDialog.showModal();
   });
+
+  // Toggle custom workout input field when "Other" option is chosen
+  const selectWorkoutEl = document.getElementById("select-workout");
+  if (selectWorkoutEl) {
+    selectWorkoutEl.addEventListener("change", (e) => {
+      const customGroup = document.getElementById("custom-workout-group");
+      if (customGroup) {
+        if (e.target.value === "Other") {
+          customGroup.classList.remove("hidden");
+        } else {
+          customGroup.classList.add("hidden");
+        }
+      }
+    });
+  }
 
   // Manual Add Modal Open
   bindClick("btn-open-manual-add", () => {
@@ -1887,10 +1917,17 @@ document.addEventListener("DOMContentLoaded", () => {
   bindClick("btn-save-diagnostics", () => {
     const weightVal = document.getElementById("input-weight").value.trim();
     const workoutTagVal = document.getElementById("select-workout").value;
+    const customWorkoutVal = document.getElementById("input-custom-workout").value.trim();
     const workoutDetailsVal = document.getElementById("textarea-workout").value.trim();
     
     state.diagnostics.weight = weightVal ? Number(weightVal) : null;
-    state.diagnostics.workoutTag = workoutTagVal;
+    
+    if (workoutTagVal === "Other") {
+      state.diagnostics.workoutTag = customWorkoutVal || "Other";
+    } else {
+      state.diagnostics.workoutTag = workoutTagVal;
+    }
+    
     state.diagnostics.workoutDetails = workoutDetailsVal;
     
     saveStateToStorage();

@@ -32,7 +32,7 @@
       <div class="onboarding-body-layout">
         <!-- Advisor Portrait Viewport -->
         <div class="onboarding-portrait-container portrait-cyan">
-          <img id="onboarding-portrait-img" src="coach_portrait.png" alt="Sentinel Portrait" class="coach-portrait-image">
+          <img id="onboarding-portrait-img" src="coach_portrait_cyan.png" alt="Sentinel Portrait" class="coach-portrait-image">
           <div class="portrait-grain-overlay"></div>
           <div class="portrait-scanlines"></div>
         </div>
@@ -172,7 +172,7 @@
         <div class="card-body terminal-body-layout" style="display: flex; align-items: flex-start; gap: 16px; padding: 14px 16px; overflow: visible;">
           <!-- Left Portrait Viewport -->
           <div id="coach-portrait-container" class="terminal-portrait-container portrait-cyan" style="cursor: pointer; flex-shrink: 0;" title="Click for Sentinel AI Sarcasm Uplink">
-            <img id="coach-portrait-img" src="coach_portrait.png" alt="Sentinel Portrait" class="coach-portrait-image">
+            <img id="coach-portrait-img" src="coach_portrait_cyan.png" alt="Sentinel Portrait" class="coach-portrait-image">
             <div class="portrait-grain-overlay"></div>
             <div class="portrait-scanlines"></div>
           </div>
@@ -281,8 +281,15 @@
               <option value="Day C">Cardio</option>
               <option value="Day D">Shoulders & Triceps</option>
               <option value="Day E">Back</option>
+              <option value="Other">Other (Custom)</option>
             </select>
           </div>
+        </div>
+
+        <!-- Custom Workout Input (Only visible when "Other" is selected) -->
+        <div id="custom-workout-group" class="input-glow-group hidden" style="margin-top: 8px;">
+          <label for="input-custom-workout" class="hud-label text-amber">CUSTOM WORKOUT NAME</label>
+          <input type="text" id="input-custom-workout" placeholder="e.g. Boxing, Yoga, Swimming" class="hud-input">
         </div>
 
         <!-- Workout Details Voice Note (mic button removed) -->
