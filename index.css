@@ -1496,9 +1496,11 @@ input.hud-input:focus {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 20px;
+  padding: 20px 12px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .onboarding-card {
@@ -1515,6 +1517,8 @@ input.hud-input:focus {
   transform-style: preserve-3d;
   background-image: linear-gradient(rgba(0, 243, 255, 0.012) 1px, transparent 1px);
   background-size: 100% 4px;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .onboarding-title {
@@ -1928,17 +1932,18 @@ input.hud-input:focus {
 
 /* Interactive Comic Guided Walkthrough Overlay */
 .walkthrough-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
   background-color: rgba(2, 4, 10, 0.7);
   z-index: 99998;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: auto;
+  pointer-events: none; /* allow scrolling page through overlay! */
 }
 
 .walkthrough-bubble {
@@ -1999,12 +2004,21 @@ input.hud-input:focus {
   pointer-events: none;
 }
 
-/* Mobile responsive fixes for bubble */
+/* Mobile responsive fixes for bubble and onboarding */
 @media (max-width: 580px) {
+  .onboarding-body-layout {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
   .onboarding-portrait-container {
-    width: 130px !important;
-    height: 130px !important;
+    width: 100px !important;
+    height: 100px !important;
     border-radius: 50% !important;
+  }
+  .onboarding-card {
+    padding: 16px !important;
+    gap: 12px !important;
   }
   .walkthrough-bubble {
     width: 90% !important;

@@ -2000,6 +2000,9 @@ function showWalkthroughStep() {
       target.classList.add("walkthrough-highlight");
     }
     
+    // Auto-scroll target into view so it's visible on smaller screens!
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    
     // Position the walkthrough bubble near the target
     const rect = target.getBoundingClientRect();
     const scrollY = window.scrollY;
