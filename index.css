@@ -135,40 +135,79 @@ body::before {
 /* Header Telemetry - Comic Transformers Style */
 .hud-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px; 
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px; 
   border-bottom: 4px solid #000000;
-  background: linear-gradient(180deg, #181b22, #0d0f13);
-  margin-bottom: 15px;
+  background: #151821; /* dark space steel */
+  margin-bottom: 22px;
   flex-shrink: 0;
-  border-radius: 0 0 8px 8px;
-  box-shadow: 0 5px 0px #000000;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 6px 0px #000000;
   transform-style: preserve-3d;
   position: relative;
   z-index: 5;
 }
 
+/* Neon glow line under header */
+.hud-header::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--neon-cyan);
+  box-shadow: var(--glow-cyan);
+  z-index: 10;
+}
+
+.header-top-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.header-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.header-status-group {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .hud-glitch-title {
   font-family: var(--font-hud-header);
-  font-size: 1.85rem; 
+  font-size: 2.6rem; /* much more prominent! */
   font-weight: 900;
-  color: #ffcc00; /* Transformers bold yellow */
-  text-shadow: 
-    -2.5px -2.5px 0 #000000,  
-     2.5px -2.5px 0 #000000,
-    -2.5px  2.5px 0 #000000,
-     2.5px  2.5px 0 #000000,
-     4px  4px 0px #ff0055, /* offset comic red shadow */
-     0px  0px 15px rgba(255, 204, 0, 0.5);
-  letter-spacing: 1.5px;
+  background: linear-gradient(135deg, #00f3ff 20%, #ffffff 50%, #00f3ff 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(2px 2px 0px #000000) drop-shadow(-2px -2px 0px #000000) drop-shadow(4px 4px 0px rgba(0, 243, 255, 0.4));
+  letter-spacing: 3px;
   transform: skewX(-12deg);
   text-transform: uppercase;
+  margin: 0;
 }
 
 .hud-tagline {
   font-family: var(--font-hud-labels);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 2px;
   color: #ffffff;
@@ -177,16 +216,10 @@ body::before {
   margin-top: 5px;
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
 .header-status-item {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .status-label {
@@ -487,10 +520,15 @@ body::before {
 
 .terminal-panel .card-header {
   text-align: center;
+  background: rgba(10, 15, 25, 0.85); /* dark slate banner background */
+  border-bottom: 2.5px solid var(--neon-cyan); /* solid glowing outline */
+  padding: 10px 14px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 
 .terminal-panel .card-header-line {
-  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+  display: none; /* hide default line */
 }
 
 .terminal-screen {
@@ -1783,21 +1821,22 @@ input.hud-input:focus {
   .terminal-panel {
     grid-column: 2;
     grid-row: 1;
+    align-self: start;
   }
   
-  .training-panel {
+  .input-panel {
     grid-column: 1;
     grid-row: 2;
   }
   
   .inventory-panel {
-    grid-column: 2;
-    grid-row: 2;
+    grid-column: 1;
+    grid-row: 3;
   }
   
-  .input-panel {
-    grid-column: 1 / span 2;
-    grid-row: 3;
+  .training-panel {
+    grid-column: 2;
+    grid-row: 2 / span 2;
   }
   
   .hud-textarea {
@@ -1810,13 +1849,13 @@ input.hud-input:focus {
   .gauges-panel {
     order: 1;
   }
-  .training-panel {
+  .input-panel {
     order: 2;
   }
   .inventory-panel {
     order: 3;
   }
-  .input-panel {
+  .training-panel {
     order: 4;
   }
   .terminal-panel {

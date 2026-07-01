@@ -1132,9 +1132,7 @@ function updateOnboardingStep() {
       completeDiv.style.padding = "5px 0";
       completeDiv.innerHTML = "<span style='font-size:0.75rem;color:var(--text-secondary);'>Press COMPLETE to establish the uplink.</span>";
       stepContent.appendChild(completeDiv);
-      break;
   }
-}
 }
 
 function saveCurrentOnboardingStepData() {

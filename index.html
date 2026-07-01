@@ -71,33 +71,39 @@
     
     <!-- Top Telemetry Panel -->
     <header class="hud-header">
-      <div class="header-left">
+      <!-- Top Row: Logo Title & Tagline taking full width -->
+      <div class="header-top-row">
         <div class="hud-glitch-title" data-text="NUTRITION HUD">NUTRITION HUD</div>
         <div class="hud-tagline">Daily Calorie & Protein Tracker</div>
       </div>
-      <div class="header-right">
-        <div class="header-status-item clock-item">
-          <span class="status-label">TIME</span>
-          <span id="sys-clock" class="status-value monospace">00:00:00</span>
+      
+      <!-- Bottom Row: Controls & Status underneath -->
+      <div class="header-bottom-row">
+        <div class="header-status-group">
+          <div class="header-status-item sync-item">
+            <span class="status-label">SYNC STATUS</span>
+            <span id="sync-status" class="status-value status-indicator offline">
+              <span class="indicator-dot"></span><span class="indicator-text">Sheet Link Missing</span>
+            </span>
+          </div>
+          <div class="header-status-item clock-item">
+            <span class="status-label">TIME</span>
+            <span id="sys-clock" class="status-value monospace">00:00:00</span>
+          </div>
+          <div class="header-status-item date-item">
+            <span class="status-label">DATE</span>
+            <span id="sys-date" class="status-value monospace">2026.06.07</span>
+          </div>
         </div>
-        <div class="header-status-item date-item">
-          <span class="status-label">DATE</span>
-          <span id="sys-date" class="status-value monospace">2026.06.07</span>
+        
+        <div class="header-controls">
+          <button id="btn-header-tutorial" class="hud-btn btn-outline" style="font-size: 0.72rem; padding: 6px 10px; letter-spacing: 1.5px; border-color: var(--neon-cyan); color: var(--neon-cyan); height: auto;" title="Tutorial & Onboarding Guide">
+            UPLINK TUTORIAL
+          </button>
+          <button id="btn-header-settings" class="hud-btn-gear" title="Settings">
+            ⚙️
+          </button>
         </div>
-        <div class="header-status-item sync-item">
-          <span class="status-label">SYNC STATUS</span>
-          <span id="sync-status" class="status-value status-indicator offline">
-            <span class="indicator-dot"></span><span class="indicator-text">Sheet Link Missing</span>
-          </span>
-        </div>
-        <!-- Tutorial Help button -->
-        <button id="btn-header-tutorial" class="hud-btn btn-outline" style="font-size: 0.72rem; padding: 6px 10px; letter-spacing: 1.5px; border-color: var(--neon-cyan); color: var(--neon-cyan); height: auto; align-self: center; margin-right: 8px;" title="Tutorial & Onboarding Guide">
-          UPLINK TUTORIAL
-        </button>
-        <!-- Settings Gear button for instant header access -->
-        <button id="btn-header-settings" class="hud-btn-gear" title="Settings">
-          ⚙️
-        </button>
       </div>
     </header>
 
