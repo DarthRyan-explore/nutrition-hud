@@ -535,7 +535,7 @@ async function generateAIAdvice() {
   const weightText = state.diagnostics.weight ? `${state.diagnostics.weight} lbs` : "Not logged";
   const workoutText = state.diagnostics.workoutTag !== "Rest" ? `${state.diagnostics.workoutTag} (Details: ${state.diagnostics.workoutDetails || 'None'})` : "Rest Day";
   
-  const prompt = `You are Advisor T-7, a dry, snarky, and sarcastic Starcraft-style tactical droid advisor on a space freighter.
+  const prompt = `You are Sentinel X-9, a dry, snarky, and sarcastic Starcraft-style tactical droid advisor on a space freighter.
 Analyze the user's metabolic status and telemetry:
 - Current Time: ${timeStr} (Hour: ${currentHour}/24)
 - Calorie Intake: ${totals.calories} kcal (Goals: Floor ${goals.calorieFloor} kcal, Ceiling ${goals.calorieCeiling} kcal)
@@ -956,11 +956,15 @@ Respond ONLY with the JSON. Do not write any explanations or other text.`;
   });
 }
 
-// ================= ONBOARDING OVERLAY =================
+// ================= INTERACTIVE SETUP & TUTORIAL WIZARD =================
+let onboardingStep = 1;
+
 function checkOnboardingStatus() {
   const overlay = document.getElementById("onboarding-overlay");
   if (overlay) {
     if (!state.settings.geminiApiKey) {
+      onboardingStep = 1;
+      updateOnboardingStep();
       overlay.classList.remove("hidden");
     } else {
       overlay.classList.add("hidden");
@@ -971,11 +975,157 @@ function checkOnboardingStatus() {
 function showOnboardingOverlay() {
   const overlay = document.getElementById("onboarding-overlay");
   if (overlay) {
-    const setupKey = document.getElementById("setup-gemini-key");
-    const setupUrl = document.getElementById("setup-sheet-url");
-    if (setupKey) setupKey.value = state.settings.geminiApiKey || "";
-    if (setupUrl) setupUrl.value = state.settings.sheetUrl || "";
+    onboardingStep = 1;
+    updateOnboardingStep();
     overlay.classList.remove("hidden");
+  }
+}
+
+function updateOnboardingStep() {
+  const dialogueText = document.getElementById("onboarding-dialogue-text");
+  const stepContent = document.getElementById("onboarding-step-content");
+  const btnBack = document.getElementById("btn-onboarding-back");
+  const btnNext = document.getElementById("btn-onboarding-next");
+  const dots = document.querySelectorAll(".onboarding-step-dots .step-dot");
+  
+  if (!dialogueText || !stepContent) return;
+  
+  // Update step dots
+  dots.forEach(dot => {
+    const step = parseInt(dot.dataset.step);
+    if (step === onboardingStep) {
+      dot.classList.add("active");
+    } else {
+      dot.classList.remove("active");
+    }
+  });
+  
+  // Manage navigation buttons visibility
+  if (onboardingStep === 1) {
+    if (btnBack) btnBack.style.visibility = "hidden";
+  } else {
+    if (btnBack) btnBack.style.visibility = "visible";
+  }
+  
+  if (btnNext) {
+    if (onboardingStep === 5) {
+      btnNext.innerText = "COMPLETE";
+    } else {
+      btnNext.innerText = "NEXT";
+    }
+  }
+  
+  // Save current input values before rendering next step
+  saveCurrentOnboardingStepData();
+  
+  // Clear step content
+  stepContent.innerHTML = "";
+  
+  // Render based on step
+  switch (onboardingStep) {
+    case 1:
+      dialogueText.innerText = "Greetings, organic unit. I am SENTINEL X-9, your tactical dietary overwatch. Before we begin tracking your thermal consumption chambers, we must establish system links. Let's get you set up.";
+      const introDiv = document.createElement("div");
+      introDiv.className = "empty-inventory-message";
+      introDiv.style.padding = "10px 0";
+      introDiv.innerHTML = "System Link Phase: <strong>INITIALIZING</strong><br><span style='font-size:0.75rem;color:var(--text-secondary);'>Press NEXT to calibrate API keys.</span>";
+      stepContent.appendChild(introDiv);
+      break;
+      
+    case 2:
+      dialogueText.innerText = "First: AI Cognitive Link. I require a Gemini API Key to parse your natural language meal reports. If you do not have one, get a free key from Google AI Studio.";
+      const keyGroup = document.createElement("div");
+      keyGroup.className = "input-glow-group";
+      keyGroup.innerHTML = `
+        <label for="setup-gemini-key" class="hud-label text-cyan">GEMINI API KEY</label>
+        <div class="input-with-toggle" style="display: flex; align-items: center; border: 1px solid var(--border-hud); background: rgba(0,0,0,0.5); border-radius: 4px; padding: 2px 8px;">
+          <input type="password" id="setup-gemini-key" placeholder="Paste your Gemini API key" class="hud-input monospace" style="flex-grow: 1; border: none; background: transparent; box-shadow: none;" value="${state.settings.geminiApiKey || ''}">
+          <button type="button" class="btn-toggle-visibility" data-target="setup-gemini-key" title="Toggle visibility" style="background:transparent;border:none;color:var(--neon-cyan);cursor:pointer;font-size:1.1rem;padding:0 8px;">👁️</button>
+        </div>
+        <span class="help-text">Get a free key from <a href="https://aistudio.google.com/" target="_blank" class="hyperlink-tech">Google AI Studio</a>.</span>
+      `;
+      stepContent.appendChild(keyGroup);
+      
+      const toggleBtn = keyGroup.querySelector(".btn-toggle-visibility");
+      if (toggleBtn) {
+        toggleBtn.addEventListener("click", () => {
+          const input = document.getElementById("setup-gemini-key");
+          if (input) {
+            input.type = input.type === "password" ? "text" : "password";
+          }
+        });
+      }
+      break;
+      
+    case 3:
+      dialogueText.innerText = "Second: Permanent Data Archival. I sync your metrics to your personal Google Sheet. Paste the Web App URL generated by your Google Apps Script deployment.";
+      const urlGroup = document.createElement("div");
+      urlGroup.className = "input-glow-group";
+      urlGroup.innerHTML = `
+        <label for="setup-sheet-url" class="hud-label text-cyan">GOOGLE SHEET WEB APP URL</label>
+        <input type="url" id="setup-sheet-url" placeholder="https://script.google.com/macros/s/.../exec" class="hud-input monospace" value="${state.settings.sheetUrl || ''}">
+        <span class="help-text">Paste the deployment Web App URL (ends in /exec).</span>
+      `;
+      stepContent.appendChild(urlGroup);
+      break;
+      
+    case 4:
+      dialogueText.innerText = "Third: Target Calibration. Define your daily thermal ceiling and muscle chamber recovery target. We will start with standard defaults, but you can calibrate them to your precise parameters.";
+      const goalsGroup = document.createElement("div");
+      goalsGroup.className = "onboarding-goals-grid";
+      goalsGroup.innerHTML = `
+        <div class="input-glow-group">
+          <label class="hud-label text-cyan">CALORIE FLOOR</label>
+          <input type="number" id="setup-cal-floor" class="hud-input monospace" value="${state.settings.goals.calorieFloor || 2400}">
+        </div>
+        <div class="input-glow-group">
+          <label class="hud-label text-cyan">CALORIE CEILING</label>
+          <input type="number" id="setup-cal-ceil" class="hud-input monospace" value="${state.settings.goals.calorieCeiling || 2550}">
+        </div>
+        <div class="input-glow-group">
+          <label class="hud-label text-cyan">PROTEIN FLOOR (G)</label>
+          <input type="number" id="setup-pro-floor" class="hud-input monospace" value="${state.settings.goals.proteinFloor || 150}">
+        </div>
+        <div class="input-glow-group">
+          <label class="hud-label text-cyan">PROTEIN TARGET (G)</label>
+          <input type="number" id="setup-pro-target" class="hud-input monospace" value="${state.settings.goals.proteinTarget || 170}">
+        </div>
+      `;
+      stepContent.appendChild(goalsGroup);
+      break;
+      
+    case 5:
+      dialogueText.innerText = "Calibration complete! Here is your quick operations run down:\n\n1. Write what you ate in the LOG FOOD panel.\n2. Log weight and workouts in the TRAINING panel.\n3. Tap my face to request custom tactical advisory reports.\n\nEnjoy the interface, organic unit.";
+      const completeDiv = document.createElement("div");
+      completeDiv.className = "empty-inventory-message";
+      completeDiv.style.padding = "5px 0";
+      completeDiv.innerHTML = "<span style='font-size:0.75rem;color:var(--text-secondary);'>Press COMPLETE to establish the uplink.</span>";
+      stepContent.appendChild(completeDiv);
+      break;
+  }
+}
+
+function saveCurrentOnboardingStepData() {
+  const setupKey = document.getElementById("setup-gemini-key");
+  if (setupKey) {
+    state.settings.geminiApiKey = setupKey.value.trim();
+  }
+  
+  const setupUrl = document.getElementById("setup-sheet-url");
+  if (setupUrl) {
+    state.settings.sheetUrl = setupUrl.value.trim();
+  }
+  
+  const calFloor = document.getElementById("setup-cal-floor");
+  const calCeil = document.getElementById("setup-cal-ceil");
+  const proFloor = document.getElementById("setup-pro-floor");
+  const proTarget = document.getElementById("setup-pro-target");
+  
+  if (calFloor && calCeil && proFloor && proTarget) {
+    state.settings.goals.calorieFloor = Math.round(Number(calFloor.value)) || 2400;
+    state.settings.goals.calorieCeiling = Math.round(Number(calCeil.value)) || 2550;
+    state.settings.goals.proteinFloor = Math.round(Number(proFloor.value)) || 150;
+    state.settings.goals.proteinTarget = Math.round(Number(proTarget.value)) || 170;
   }
 }
 
@@ -1082,6 +1232,22 @@ function renderGauges() {
   }
 }
 
+function openDiagnosticsModal() {
+  sfx.play('beep');
+  
+  const inputWeight = document.getElementById("input-weight");
+  if (inputWeight) inputWeight.value = state.diagnostics.weight || "";
+  
+  const selectWorkout = document.getElementById("select-workout");
+  if (selectWorkout) selectWorkout.value = state.diagnostics.workoutTag || "Rest";
+  
+  const textareaWorkout = document.getElementById("textarea-workout");
+  if (textareaWorkout) textareaWorkout.value = state.diagnostics.workoutDetails || "";
+  
+  const diagDialog = document.getElementById("dialog-diagnostics");
+  if (diagDialog) diagDialog.showModal();
+}
+
 function renderMealList() {
   const workoutContainer = document.getElementById("workout-container");
   const mealList = document.getElementById("meal-list");
@@ -1119,9 +1285,7 @@ function renderMealList() {
       const btnWorkoutEdit = workoutItem.querySelector(".btn-workout-edit-inline");
       if (btnWorkoutEdit) {
         btnWorkoutEdit.addEventListener("click", () => {
-          sfx.play('beep');
-          const diagDialog = document.getElementById("dialog-diagnostics");
-          if (diagDialog) diagDialog.showModal();
+          openDiagnosticsModal();
         });
       }
     } else {
@@ -1137,15 +1301,13 @@ function renderMealList() {
       
       promptItem.innerHTML = `
         <span class="text-orange" style="font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px;">
-          [ + LOG WORKOUT & BODY WEIGHT ]
+          [ + LOG DAILY TRAINING & WEIGHT ]
         </span>
       `;
       workoutContainer.appendChild(promptItem);
       
       promptItem.addEventListener("click", () => {
-        sfx.play('beep');
-        const diagDialog = document.getElementById("dialog-diagnostics");
-        if (diagDialog) diagDialog.showModal();
+        openDiagnosticsModal();
       });
     }
   }
@@ -1336,7 +1498,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Global click-triggered digital glitch
   document.addEventListener("click", (e) => {
     const target = e.target;
-    if (target.matches("button, .hud-btn, .hud-btn-gear, .btn-item-action, .btn-mini-delete, .dialog-close, select, input, textarea, .terminal-portrait-container")) {
+    if (target.matches("button, .hud-btn, .hud-btn-gear, .btn-item-action, .btn-mini-delete, .dialog-close, select, .terminal-portrait-container")) {
       triggerGlitch();
     }
   });
@@ -1492,32 +1654,68 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Onboarding Setup Submit
-  bindClick("btn-setup-activate", () => {
-    const setupKey = document.getElementById("setup-gemini-key");
-    const setupUrl = document.getElementById("setup-sheet-url");
+  // Onboarding Setup Back Button
+  bindClick("btn-onboarding-back", () => {
+    sfx.play('click');
+    if (onboardingStep > 1) {
+      saveCurrentOnboardingStepData();
+      onboardingStep--;
+      updateOnboardingStep();
+    }
+  });
+
+  // Onboarding Setup Next Button
+  bindClick("btn-onboarding-next", () => {
+    sfx.play('click');
     
-    const key = setupKey ? setupKey.value.trim() : "";
-    const url = setupUrl ? setupUrl.value.trim() : "";
+    // Save current step data
+    saveCurrentOnboardingStepData();
     
-    if (!key) {
-      sfx.play('error');
-      alert("Please enter a Gemini API Key to use the food log parser.");
-      return;
+    // Validate Step 2 (API Key) before proceeding
+    if (onboardingStep === 2) {
+      const keyVal = state.settings.geminiApiKey;
+      if (!keyVal) {
+        sfx.play('error');
+        alert("A Gemini API Key is required to decode food ingestion payloads.");
+        return;
+      }
     }
     
-    state.settings.geminiApiKey = key;
-    state.settings.sheetUrl = url;
+    if (onboardingStep < 5) {
+      onboardingStep++;
+      updateOnboardingStep();
+    } else {
+      // Close onboarding and save
+      saveStateToStorage();
+      sfx.play('success');
+      
+      const overlay = document.getElementById("onboarding-overlay");
+      if (overlay) overlay.classList.add("hidden");
+      
+      renderAll();
+      if (state.settings.sheetUrl) {
+        triggerSheetsSync();
+      }
+    }
+  });
+
+  // Onboarding Close button (for skipping/closing tutorial)
+  bindClick("btn-onboarding-close", () => {
+    sfx.play('click');
     
+    // Save whatever was entered
+    saveCurrentOnboardingStepData();
     saveStateToStorage();
-    sfx.play('success');
     
-    checkOnboardingStatus();
+    const overlay = document.getElementById("onboarding-overlay");
+    if (overlay) overlay.classList.add("hidden");
+    
     renderAll();
-    
-    if (url) {
-      triggerSheetsSync();
-    }
+  });
+
+  // Help / Tutorial Button in Header
+  bindClick("btn-header-tutorial", () => {
+    showOnboardingOverlay();
   });
 
   // Dictionary manual add
