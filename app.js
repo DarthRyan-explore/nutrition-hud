@@ -484,7 +484,7 @@ function updateAdvisory() {
   
   const terminalScreen = document.getElementById("advisory-text");
   if (terminalScreen) {
-    terminalScreen.className = `terminal-text ${accentClass}`;
+    terminalScreen.className = "speech-bubble-text";
     terminalScreen.innerText = advisoryText;
   }
   
@@ -850,7 +850,7 @@ function parseIngestionWithAI(inputText) {
   
   const terminalScreen = document.getElementById("advisory-text");
   if (terminalScreen) {
-    terminalScreen.className = "terminal-text text-cyan";
+    terminalScreen.className = "speech-bubble-text";
     terminalScreen.innerText = `[LOG FOOD]\nParsing intake details...\nConnecting to Gemini AI...`;
   }
   sfx.play('transmit');
@@ -958,7 +958,7 @@ Respond ONLY with the JSON. Do not write any explanations or other text.`;
     
     if (terminalScreen) {
       const errMsg = err.message || err.toString() || "Unknown communication error";
-      terminalScreen.className = "terminal-text text-crimson";
+      terminalScreen.className = "speech-bubble-text";
       terminalScreen.innerText = `[UPLINK FAILED]\nCOGNITIVE UPLINK ERROR.\n\nDetails: ${errMsg}\n\nConnection failed. Please check your network and API key, and try again later.`;
     }
     setPortraitState('crimson');
