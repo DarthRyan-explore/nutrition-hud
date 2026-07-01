@@ -1888,6 +1888,11 @@ input.hud-input:focus {
   min-height: 80px;
 }
 
+.speech-bubble * {
+  color: #000000 !important;
+  text-shadow: none !important;
+}
+
 /* Tail pointing left */
 .speech-bubble::before {
   content: "";
@@ -2059,5 +2064,25 @@ input.hud-input:focus {
     top: auto !important;
     left: auto !important;
     transform: none !important;
+  }
+  .terminal-body-layout {
+    flex-direction: row !important;
+    gap: 10px !important;
+    padding: 10px !important;
+    overflow: visible !important;
+  }
+  .terminal-portrait-container {
+    width: 70px !important;
+    height: 110px !important;
+  }
+  .speech-bubble-wrapper {
+    margin-left: 8px !important;
+  }
+  .speech-bubble {
+    padding: 10px 12px !important;
+    min-height: 60px !important;
+  }
+  .speech-bubble::before, .speech-bubble::after {
+    top: 15px !important;
   }
 }
