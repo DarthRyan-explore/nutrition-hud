@@ -91,8 +91,8 @@
           </span>
         </div>
         <!-- Tutorial Help button -->
-        <button id="btn-header-tutorial" class="hud-btn-help" title="Tutorial Guide" style="margin-right: 8px;">
-          ❓
+        <button id="btn-header-tutorial" class="hud-btn btn-outline" style="font-size: 0.72rem; padding: 6px 10px; letter-spacing: 1.5px; border-color: var(--neon-cyan); color: var(--neon-cyan); height: auto; align-self: center; margin-right: 8px;" title="Tutorial & Onboarding Guide">
+          UPLINK TUTORIAL
         </button>
         <!-- Settings Gear button for instant header access -->
         <button id="btn-header-settings" class="hud-btn-gear" title="Settings">
@@ -105,7 +105,7 @@
     <main class="hud-main-grid">
       
       <!-- COLUMN 1: Gauges -->
-      <section class="hud-card gauges-panel">
+      <section id="card-goals" class="hud-card gauges-panel">
         <div class="card-header">
           <h2 class="card-title"><span class="tech-bracket">[</span> DAILY GOALS <span class="tech-bracket">]</span></h2>
           <div class="card-header-line"></div>
@@ -157,36 +157,35 @@
         </div>
       </section>
 
-      <!-- COLUMN 2: Advisor Viewport (The Snarky Terminal) -->
-      <section class="hud-card terminal-panel">
+      <!-- COLUMN 2: Sentinel Viewport (The Snarky Advisor) -->
+      <section id="coach-portrait-panel" class="hud-card terminal-panel">
         <div class="card-header">
-          <h2 class="card-title"><span class="tech-bracket">[</span> ADVISOR T-7 // ACTIVE LINK <span class="tech-bracket">]</span></h2>
+          <h2 class="card-title"><span class="tech-bracket">[</span> SENTINEL X-9 // ACTIVE LINK <span class="tech-bracket">]</span></h2>
           <div class="card-header-line"></div>
         </div>
-        <div class="card-body terminal-screen">
-          <div class="terminal-body-layout">
-            <!-- Left Portrait Viewport -->
-            <div id="coach-portrait-container" class="terminal-portrait-container portrait-cyan" style="cursor: pointer;" title="Click for Advisor AI Uplink Advice">
-              <img id="coach-portrait-img" src="coach_portrait.png" alt="Advisor Portrait" class="coach-portrait-image">
-              <div class="portrait-grain-overlay"></div>
-              <div class="portrait-scanlines"></div>
-            </div>
-            
-            <!-- Right Text Content -->
-            <div class="terminal-content">
-              <div id="advisory-text" class="terminal-text">
-                Establishing connection...
-                Analyzing metabolic targets...
-                Awaiting nutrient updates...
+        <div class="card-body terminal-body-layout" style="display: flex; align-items: flex-start; gap: 16px; padding: 14px 16px; overflow: visible;">
+          <!-- Left Portrait Viewport -->
+          <div id="coach-portrait-container" class="terminal-portrait-container portrait-cyan" style="cursor: pointer; flex-shrink: 0;" title="Click for Sentinel AI Sarcasm Uplink">
+            <img id="coach-portrait-img" src="coach_portrait.png" alt="Sentinel Portrait" class="coach-portrait-image">
+            <div class="portrait-grain-overlay"></div>
+            <div class="portrait-scanlines"></div>
+          </div>
+          
+          <!-- Right Speech Bubble -->
+          <div class="speech-bubble-wrapper">
+            <div class="speech-bubble">
+              <div id="advisory-text" class="speech-bubble-text" style="white-space: pre-line;">
+                ESTABLISHING UPLINK...
+                ANALYZING METABOLIC TARGETS...
+                AWAITING NUTRIENT UPDATES...
               </div>
             </div>
           </div>
-          <div class="terminal-glow"></div>
         </div>
       </section>
 
       <!-- COLUMN 3A: Training Log & Status -->
-      <section class="hud-card training-panel">
+      <section id="card-training" class="hud-card training-panel">
         <div class="card-header">
           <h2 class="card-title text-amber"><span class="tech-bracket">[</span> TRAINING LOG & STATUS <span class="tech-bracket">]</span></h2>
           <div class="card-header-line-orange"></div>
@@ -199,7 +198,7 @@
       </section>
 
       <!-- COLUMN 3B: Food Ingestion Log -->
-      <section class="hud-card inventory-panel">
+      <section id="card-food-log" class="hud-card inventory-panel">
         <div class="card-header">
           <h2 class="card-title"><span class="tech-bracket">[</span> FOOD INGESTION LOG <span class="tech-bracket">]</span></h2>
           <div class="card-header-line"></div>
@@ -213,7 +212,7 @@
       </section>
 
       <!-- COLUMN 4: Input Console (Bottom Fixed/Sticky on Mobile) -->
-      <section class="hud-card input-panel">
+      <section id="card-input" class="hud-card input-panel">
         <div class="card-header">
           <h2 class="card-title"><span class="tech-bracket">[</span> LOG FOOD <span class="tech-bracket">]</span></h2>
           <div class="card-header-line"></div>
@@ -453,6 +452,17 @@
       </div>
     </div>
   </dialog>
+
+  <!-- Comic Guided Walkthrough Tooltip Overlay -->
+  <div id="walkthrough-overlay" class="walkthrough-overlay hidden">
+    <div id="walkthrough-bubble" class="walkthrough-bubble">
+      <div id="walkthrough-text" class="walkthrough-text"></div>
+      <div class="walkthrough-footer">
+        <span class="walkthrough-step-indicator">SYSTEM LINK: STEP <span id="walkthrough-step-num">1</span>/5</span>
+        <button id="btn-walkthrough-next" class="hud-btn btn-cyan font-bold" style="padding: 4px 10px; font-size: 0.72rem;">NEXT PROTOCOL</button>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js?v=9"></script>
 </body>

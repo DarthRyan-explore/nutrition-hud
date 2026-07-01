@@ -535,7 +535,7 @@ async function generateAIAdvice() {
   const weightText = state.diagnostics.weight ? `${state.diagnostics.weight} lbs` : "Not logged";
   const workoutText = state.diagnostics.workoutTag !== "Rest" ? `${state.diagnostics.workoutTag} (Details: ${state.diagnostics.workoutDetails || 'None'})` : "Rest Day";
   
-  const prompt = `You are Sentinel X-9, a dry, snarky, and sarcastic Starcraft-style tactical droid advisor on a space freighter.
+  const prompt = `You are Sentinel X-9, a snarky, sarcastic, and unhinged tactical dietary sentinel droid with a personality blending HK-47 from Star Wars (calling users organics/meatbags) and the over-the-top, breaking-the-fourth-wall sarcasm of Deadpool (heavy on Ryan Reynolds style pop-culture wit).
 Analyze the user's metabolic status and telemetry:
 - Current Time: ${timeStr} (Hour: ${currentHour}/24)
 - Calorie Intake: ${totals.calories} kcal (Goals: Floor ${goals.calorieFloor} kcal, Ceiling ${goals.calorieCeiling} kcal)
@@ -544,12 +544,20 @@ Analyze the user's metabolic status and telemetry:
 - Body Weight: ${weightText}
 - Food Logged Today: ${mealsList || 'No food logged yet'}
 
-Generate a short, highly snarky, and dry advisory message.
-Guidelines:
-1. DO NOT print the raw calorie or protein numbers (e.g. "You have eaten 760 kcal and 38g of protein") as these are already displayed in the HUD. Instead, refer to them qualitatively (e.g. "Your protein intake is lagging behind a snail's pace", "Your calories are nearing structural limits").
-2. Reference the time of day, workout status, or specific food logged if relevant (e.g. if they logged a "cookie" or did a heavy chest day).
-3. Keep the tone very sarcastic, sci-fi, and military-protocol style.
-4. Keep the message short (2 to 4 sentences max). Do not include any greeting or conversational filler like "Here is your advice". Respond ONLY with the advisor's snarky message.`;
+Your task: Evaluate their progress. Be dry, highly sarcastic, and unhinged. Mock their shortcomings or deliver slight backhanded compliments (e.g., "Wow, you hit your protein goals. I assume this is to compensate for the absolute disaster that is your sleep schedule or love life."). If they ate healthy, mock their health-nut energy. If they ate junk, tease them mercilessly.
+
+Choose one of these facial expressions (portrait colors) that fits your message tone:
+- "green": Smug, mocking, backhanded compliments, cocky satisfaction.
+- "purple": Sarcastic confusion, deep irony, judging their choices.
+- "cyan": Neutral, cold robotic observation.
+- "amber": Annoyed, disappointed, noting a moderate protein deficit.
+- "crimson": Alarm, critical failure (extreme deficit or massive calorie surplus).
+
+RESPOND ONLY with a raw JSON object in this format (no markdown code blocks, no backticks, no other text):
+{
+  "portrait": "green|purple|cyan|amber|crimson",
+  "message": "your advice message"
+}`;
 
   const requestUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   
@@ -575,24 +583,31 @@ Guidelines:
       let text = data.candidates[0].content.parts[0].text.trim();
       
       // Clean up markdown blockquotes if returned
-      text = text.replace(/^`+|`+$/g, "").trim();
+      text = text.replace(/^```json/g, "").replace(/^```/g, "").replace(/```$/g, "").trim();
       
-      // Determine accent class and pose based on current state
-      let accentClass = "text-cyan";
-      if (totals.calories > goals.calorieCeiling || (currentHour >= 17 && (goals.calorieCeiling - totals.calories <= 250) && (goals.proteinFloor - totals.protein > 0))) {
-        accentClass = "text-crimson";
-      } else if (totals.protein < goals.proteinFloor && currentHour >= 12) {
-        accentClass = "text-amber";
+      let parsedMessage = "";
+      let portraitColor = "cyan";
+      
+      try {
+        const parsed = JSON.parse(text);
+        parsedMessage = parsed.message || parsed.text || text;
+        portraitColor = parsed.portrait || "cyan";
+      } catch (err) {
+        parsedMessage = text;
+        if (totals.calories > goals.calorieCeiling || (currentHour >= 17 && (goals.calorieCeiling - totals.calories <= 250) && (goals.proteinFloor - totals.protein > 0))) {
+          portraitColor = "crimson";
+        } else if (totals.protein < goals.proteinFloor && currentHour >= 12) {
+          portraitColor = "amber";
+        } else {
+          portraitColor = "purple";
+        }
       }
       
       if (terminalScreen) {
-        terminalScreen.className = `terminal-text ${accentClass}`;
-        terminalScreen.innerText = text;
+        terminalScreen.innerText = parsedMessage;
       }
       
-      // Apply corresponding portrait style
-      const rawColor = accentClass.replace('text-', '');
-      setPortraitState(rawColor);
+      setPortraitState(portraitColor);
       
       sfx.play('success');
     } else {
@@ -981,6 +996,17 @@ function showOnboardingOverlay() {
   }
 }
 
+function setOnboardingPortraitState(color) {
+  const container = document.querySelector(".onboarding-portrait-container");
+  if (container) {
+    container.className = `onboarding-portrait-container portrait-${color}`;
+  }
+  const img = document.getElementById("onboarding-portrait-img");
+  if (img) {
+    img.src = `coach_portrait_${color}.png`;
+  }
+}
+
 function updateOnboardingStep() {
   const dialogueText = document.getElementById("onboarding-dialogue-text");
   const stepContent = document.getElementById("onboarding-step-content");
@@ -1024,16 +1050,18 @@ function updateOnboardingStep() {
   // Render based on step
   switch (onboardingStep) {
     case 1:
-      dialogueText.innerText = "Greetings, organic unit. I am SENTINEL X-9, your tactical dietary overwatch. Before we begin tracking your thermal consumption chambers, we must establish system links. Let's get you set up.";
+      setOnboardingPortraitState("purple");
+      dialogueText.innerText = "GREETINGS, INFERIOR FLESH-SAC. I AM SENTINEL X-9, YOUR DIETARY CONSCIENCE AND TACTICAL DROID OVERWATCH. BEFORE I CAN BEGIN MOCKING YOUR DISMAL PHYSICAL CONDITION, WE MUST ESTABLISH SYSTEM UPLINKS.\n\nPRESS NEXT TO PROCEED WITH MY SYSTEM LINK, OR CONTINUE YOUR SLOW BIODEGRADATION IN PEACE.";
       const introDiv = document.createElement("div");
       introDiv.className = "empty-inventory-message";
       introDiv.style.padding = "10px 0";
-      introDiv.innerHTML = "System Link Phase: <strong>INITIALIZING</strong><br><span style='font-size:0.75rem;color:var(--text-secondary);'>Press NEXT to calibrate API keys.</span>";
+      introDiv.innerHTML = "System Link Phase: <strong>INITIALIZING</strong><br><span style='font-size:0.75rem;color:var(--text-secondary);'>Press NEXT to calibrate cognitive links.</span>";
       stepContent.appendChild(introDiv);
       break;
       
     case 2:
-      dialogueText.innerText = "First: AI Cognitive Link. I require a Gemini API Key to parse your natural language meal reports. If you do not have one, get a free key from Google AI Studio.";
+      setOnboardingPortraitState("cyan");
+      dialogueText.innerText = "STEP 1: COGNITIVE BRIDGE.\n\nI REQUIRE A GEMINI API KEY TO FUEL MY ARTIFICIAL SYNAPSES SO I CAN INTERPRET YOUR SLOPPY NATURAL LANGUAGE MEAL LOGS. GET A FREE KEY VIA THE LINK BELOW AND PASTE IT IN THE FIELD. DO NOT ACCIDENTALLY PASTE YOUR TWITTER PASSWORD OR SOMETHING.";
       const keyGroup = document.createElement("div");
       keyGroup.className = "input-glow-group";
       keyGroup.innerHTML = `
@@ -1058,19 +1086,21 @@ function updateOnboardingStep() {
       break;
       
     case 3:
-      dialogueText.innerText = "Second: Permanent Data Archival. I sync your metrics to your personal Google Sheet. Paste the Web App URL generated by your Google Apps Script deployment.";
+      setOnboardingPortraitState("purple");
+      dialogueText.innerText = "STEP 2: DATABASE ANCHOR.\n\nI SYNC YOUR TELEMETRY TO A GOOGLE SHEET SO IT SURVIVES YOUR INEVITABLE MEMORY COLLAPSES. AS A NOOB-SAFE GUIDE:\n\n1. OPEN A NEW GOOGLE SHEET & GO TO EXTENSIONS -> APPS SCRIPT.\n2. COPY THE SCRIPT CODE (IT'S IN YOUR LOCAL GOOGLE_APPS_SCRIPT.JS FILE) AND PASTE IT IN THERE.\n3. CLICK 'DEPLOY' (TOP RIGHT) -> 'NEW DEPLOYMENT'.\n4. CHOOSE TYPE: 'WEB APP', EXECUTE AS: 'ME', ACCESS: 'ANYONE'.\n5. AUTHORIZE ACCESS AND PASTE THE 'WEB APP URL' BELOW.";
       const urlGroup = document.createElement("div");
       urlGroup.className = "input-glow-group";
       urlGroup.innerHTML = `
         <label for="setup-sheet-url" class="hud-label text-cyan">GOOGLE SHEET WEB APP URL</label>
         <input type="url" id="setup-sheet-url" placeholder="https://script.google.com/macros/s/.../exec" class="hud-input monospace" value="${state.settings.sheetUrl || ''}">
-        <span class="help-text">Paste the deployment Web App URL (ends in /exec).</span>
+        <span class="help-text">Paste the Web App URL (ends in /exec).</span>
       `;
       stepContent.appendChild(urlGroup);
       break;
       
     case 4:
-      dialogueText.innerText = "Third: Target Calibration. Define your daily thermal ceiling and muscle chamber recovery target. We will start with standard defaults, but you can calibrate them to your precise parameters.";
+      setOnboardingPortraitState("amber");
+      dialogueText.innerText = "STEP 3: FUEL TARGET METRICS.\n\nCALIBRATE YOUR PROTEIN CHANNELS AND THERMAL CEILING. COCKY OBSERVATION: DEFAULT IS 2400 CALORIES AND 170g PROTEIN. ADJUST THEM BELOW. IF YOU OVEREAT, ALARMS WILL TRIGGER.";
       const goalsGroup = document.createElement("div");
       goalsGroup.className = "onboarding-goals-grid";
       goalsGroup.innerHTML = `
@@ -1095,7 +1125,8 @@ function updateOnboardingStep() {
       break;
       
     case 5:
-      dialogueText.innerText = "Calibration complete! Here is your quick operations run down:\n\n1. Write what you ate in the LOG FOOD panel.\n2. Log weight and workouts in the TRAINING panel.\n3. Tap my face to request custom tactical advisory reports.\n\nEnjoy the interface, organic unit.";
+      setOnboardingPortraitState("green");
+      dialogueText.innerText = "SYSTEM COGNITIVE LINKS FULLY CONNECTED!\n\nTHE COGNITIVE CIRCUITS ARE ONLINE. YOU CAN NOW MEAL-LOG IN THE INPUT BOX, DEFINE TRAINING DECK ACTIVITIES IN THE TRAINING CARD, OR TAP MY FACE AT ANY TIME FOR DYNAMIC EVALUATIONS.\n\nCOMMENCING MAIN SCREEN GUIDED WALKTHROUGH DIRECTIVE... CLICK COMPLETE TO BEGIN OR DISMISS ME.";
       const completeDiv = document.createElement("div");
       completeDiv.className = "empty-inventory-message";
       completeDiv.style.padding = "5px 0";
@@ -1103,6 +1134,7 @@ function updateOnboardingStep() {
       stepContent.appendChild(completeDiv);
       break;
   }
+}
 }
 
 function saveCurrentOnboardingStepData() {
@@ -1696,6 +1728,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (state.settings.sheetUrl) {
         triggerSheetsSync();
       }
+      
+      // Launch guided walkthrough
+      setTimeout(() => {
+        startMainWalkthrough();
+      }, 400);
     }
   });
 
@@ -1875,4 +1912,125 @@ document.addEventListener("DOMContentLoaded", () => {
   const now = new Date();
   const clock = document.getElementById("sys-clock");
   if (clock) clock.innerText = String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0') + ":" + String(now.getSeconds()).padStart(2, '0');
+
+  // Bind Walkthrough next button click
+  bindClick("btn-walkthrough-next", (e) => {
+    e.stopPropagation();
+    walkthroughStep++;
+    showWalkthroughStep();
+  });
+  
+  // Clicking the overlay background advances it too
+  const walkthroughOverlay = document.getElementById("walkthrough-overlay");
+  if (walkthroughOverlay) {
+    walkthroughOverlay.addEventListener("click", () => {
+      walkthroughStep++;
+      showWalkthroughStep();
+    });
+  }
 });
+
+// ================= INTERACTIVE COMIC SCREEN WALKTHROUGH =================
+let walkthroughStep = 0;
+const walkthroughSteps = [
+  {
+    targetId: "card-goals",
+    text: "HERE ARE YOUR METABOLIC FUEL GAUGES. CALORIES ARE CALIBRATED BETWEEN THE FLOORS AND CEILINGS WE CHOSE, AND PROTEIN MONITORS RECOVERY. KEEP THEM GREEN OR BE PREPARED FOR DROID MOCKERY.",
+    position: "bottom"
+  },
+  {
+    targetId: "card-training",
+    text: "THE TRAINING DECK. LOG REPS, INTENSITIES, AND METRIC BODY WEIGHTS. REST DAYS ARE ACCEPTABLE, EXCUSES ARE AN OFFENSE PUNISHABLE BY AIRLOCK EJECTION.",
+    position: "bottom"
+  },
+  {
+    targetId: "card-food-log",
+    text: "YOUR TODAY INGESTION HISTORY LOGS. ALL COMMITTED TARGET FUEL IS VISIBLE HERE. TAP THE RED MINI-DELETE ACTION TO RETRACT ENTRIES.",
+    position: "top"
+  },
+  {
+    targetId: "card-input",
+    text: "YOUR COMMAND INTERFACE. CONSTRUCT NATURAL SENTENCES E.G. '3 EGGS AND RYE TOAST' AND CLICK LOG FOOD. MY AI SYNAPSES RESOLVE CALORIES INSTANTLY.",
+    position: "top"
+  },
+  {
+    targetId: "coach-portrait-panel",
+    text: "AND FINALLY, MY COMPASSIONATE VIEWPORT. CLICK MY PORTRAIT AT ANY TIME TO RECEIVE A BRUTALLY HONEST EVALUATION OF YOUR NUTRITIONAL DISCIPLINE. IT IS HEAVY ON SARCASTIC COMPLIMENTS. ENJOY THE HUD, HUMAN.",
+    position: "bottom"
+  }
+];
+
+function startMainWalkthrough() {
+  const overlay = document.getElementById("walkthrough-overlay");
+  if (!overlay) return;
+  
+  walkthroughStep = 0;
+  overlay.classList.remove("hidden");
+  showWalkthroughStep();
+}
+
+function showWalkthroughStep() {
+  const overlay = document.getElementById("walkthrough-overlay");
+  const bubble = document.getElementById("walkthrough-bubble");
+  const textEl = document.getElementById("walkthrough-text");
+  const stepNumEl = document.getElementById("walkthrough-step-num");
+  
+  if (!overlay || !bubble || !textEl || !stepNumEl) return;
+  
+  // Clear any existing highlights
+  document.querySelectorAll(".walkthrough-highlight, .walkthrough-highlight-portrait").forEach(el => {
+    el.classList.remove("walkthrough-highlight", "walkthrough-highlight-portrait");
+  });
+  
+  if (walkthroughStep >= walkthroughSteps.length) {
+    overlay.classList.add("hidden");
+    sfx.play('success');
+    return;
+  }
+  
+  sfx.play('beep');
+  const step = walkthroughSteps[walkthroughStep];
+  stepNumEl.innerText = walkthroughStep + 1;
+  textEl.innerText = step.text;
+  
+  // Highlight targeted element
+  const target = document.getElementById(step.targetId);
+  if (target) {
+    if (step.targetId === "coach-portrait-panel") {
+      target.classList.add("walkthrough-highlight-portrait");
+    } else {
+      target.classList.add("walkthrough-highlight");
+    }
+    
+    // Position the walkthrough bubble near the target
+    const rect = target.getBoundingClientRect();
+    const scrollY = window.scrollY;
+    
+    if (window.innerWidth <= 580) {
+      bubble.style.position = "fixed";
+      bubble.style.bottom = "20px";
+      bubble.style.top = "auto";
+      bubble.style.left = "5%";
+      bubble.style.transform = "none";
+    } else {
+      bubble.style.position = "absolute";
+      if (step.position === "bottom") {
+        bubble.style.top = `${rect.bottom + scrollY + 12}px`;
+        bubble.style.left = `${rect.left + (rect.width / 2) - 160}px`;
+        bubble.style.transform = "none";
+      } else if (step.position === "top") {
+        bubble.style.top = `${rect.top + scrollY - 180}px`;
+        bubble.style.left = `${rect.left + (rect.width / 2) - 160}px`;
+        bubble.style.transform = "none";
+      } else if (step.position === "left") {
+        bubble.style.top = `${rect.top + scrollY}px`;
+        bubble.style.left = `${rect.left - 340}px`;
+        bubble.style.transform = "none";
+      }
+    }
+  } else {
+    bubble.style.top = "50%";
+    bubble.style.left = "50%";
+    bubble.style.transform = "translate(-50%, -50%)";
+  }
+}
