@@ -45,12 +45,11 @@ body {
   background-color: var(--bg-space);
   color: var(--text-primary);
   font-family: var(--font-body);
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100dvh;
-  overflow: hidden;
+  position: relative;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   font-size: 15px; 
   line-height: 1.45;
   perspective: 1200px; /* Enable 3D space for tilt effect */
@@ -120,11 +119,11 @@ body::before {
 .hud-container {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  min-height: 100dvh;
   padding: env(safe-area-inset-top) 14px calc(env(safe-area-inset-bottom) + 12px) 14px;
   position: relative;
   z-index: 10;
-  overflow: hidden;
+  overflow: visible;
   animation: hologram-flicker 7s infinite;
   
   /* 3D preserve style for parallax tilt physics */
@@ -385,9 +384,6 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  flex-grow: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   padding-bottom: 20px;
   position: relative;
   z-index: 5;
