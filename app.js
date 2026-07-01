@@ -2062,11 +2062,18 @@ function showWalkthroughStep() {
     const scrollY = window.scrollY;
     
     if (window.innerWidth <= 580) {
-      bubble.style.position = "fixed";
-      bubble.style.bottom = "20px";
-      bubble.style.top = "auto";
+      bubble.style.position = "absolute";
       bubble.style.left = "5%";
+      bubble.style.width = "90%";
       bubble.style.transform = "none";
+      
+      if (rect.top > window.innerHeight / 2) {
+        // Target is lower down, place bubble above it
+        bubble.style.top = `${rect.top + scrollY - 175}px`;
+      } else {
+        // Target is higher up, place bubble below it
+        bubble.style.top = `${rect.bottom + scrollY + 12}px`;
+      }
     } else {
       bubble.style.position = "absolute";
       if (step.position === "bottom") {

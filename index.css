@@ -2056,10 +2056,6 @@ input.hud-input:focus {
   .walkthrough-bubble {
     width: 90% !important;
     max-width: 320px;
-    bottom: 20px;
-    top: auto !important;
-    left: auto !important;
-    transform: none !important;
   }
   .terminal-body-layout {
     flex-direction: row !important;
@@ -2081,4 +2077,32 @@ input.hud-input:focus {
   .speech-bubble::before, .speech-bubble::after {
     top: 15px !important;
   }
+}
+
+/* High Contrast Walkthrough Comic Button Styling */
+.walkthrough-bubble .hud-btn {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #000000 !important;
+  box-shadow: none !important;
+  font-family: var(--font-hud-labels) !important;
+  font-size: 0.72rem !important;
+  padding: 6px 12px !important;
+  cursor: pointer !important;
+  border-radius: 4px !important;
+  height: auto !important;
+}
+
+.walkthrough-bubble .hud-btn:hover {
+  background: #222222 !important;
+}
+
+.walkthrough-bubble .btn-outline {
+  background: transparent !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+}
+
+.walkthrough-bubble .btn-outline:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
 }
