@@ -1009,6 +1009,11 @@ function setOnboardingPortraitState(color) {
 }
 
 function updateOnboardingStep() {
+  // Blur active input to prevent iOS scroll-to-top bug when inputs are removed from DOM
+  if (document.activeElement && typeof document.activeElement.blur === 'function') {
+    document.activeElement.blur();
+  }
+
   const dialogueText = document.getElementById("onboarding-dialogue-text");
   const stepContent = document.getElementById("onboarding-step-content");
   const btnBack = document.getElementById("btn-onboarding-back");
@@ -2013,6 +2018,10 @@ function startMainWalkthrough() {
 }
 
 function showWalkthroughStep() {
+  if (document.activeElement && typeof document.activeElement.blur === 'function') {
+    document.activeElement.blur();
+  }
+
   const overlay = document.getElementById("walkthrough-overlay");
   const bubble = document.getElementById("walkthrough-bubble");
   const textEl = document.getElementById("walkthrough-text");
