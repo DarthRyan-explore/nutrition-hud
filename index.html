@@ -122,18 +122,13 @@
           <div class="gauge-group" id="calorie-gauge-container">
             <div class="gauge-label-row">
               <span class="gauge-name">DAILY CALORIES</span>
-              <span class="gauge-numerical"><span id="current-calories" class="number-glow">0</span> / <span class="calorie-target-range">2400-2550</span> <span class="unit-label">kcal</span></span>
+              <span class="gauge-numerical"><span id="current-calories" class="number-glow">0</span> / <span id="target-calories">2400</span> <span class="unit-label">kcal</span></span>
             </div>
             
             <!-- Segmented Calorie Progress Bar -->
             <div class="segmented-bar-container">
               <div class="segmented-bar" id="calorie-bar">
                 <!-- 20 segments generated via JS -->
-              </div>
-              <div class="range-markers">
-                <span class="marker" style="left: 0%;">0</span>
-                <span class="marker marker-range" style="left: 72%;">[FLOOR: 2400]</span>
-                <span class="marker marker-range" style="left: 88%;">[CEILING: 2550]</span>
               </div>
             </div>
             <div id="calorie-delta" class="gauge-delta text-amber">LOADING GOALS...</div>
@@ -143,18 +138,13 @@
           <div class="gauge-group" id="protein-gauge-container">
             <div class="gauge-label-row">
               <span class="gauge-name">DAILY PROTEIN</span>
-              <span class="gauge-numerical"><span id="current-protein" class="number-glow">0</span> / <span class="protein-target-range">150-170</span> <span class="unit-label">g</span></span>
+              <span class="gauge-numerical"><span id="current-protein" class="number-glow">0</span> / <span id="target-protein">170</span> <span class="unit-label">g</span></span>
             </div>
             
             <!-- Segmented Protein Progress Bar -->
             <div class="segmented-bar-container">
               <div class="segmented-bar" id="protein-bar">
                 <!-- 20 segments generated via JS -->
-              </div>
-              <div class="range-markers">
-                <span class="marker" style="left: 0%;">0</span>
-                <span class="marker marker-range" style="left: 75%;">[FLOOR: 150g]</span>
-                <span class="marker marker-range" style="left: 92%;">[TARGET: 170g]</span>
               </div>
             </div>
             <div id="protein-delta" class="gauge-delta text-amber">LOADING GOALS...</div>

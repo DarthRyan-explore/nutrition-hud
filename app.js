@@ -515,7 +515,7 @@ async function generateAIAdvice() {
   
   const terminalScreen = document.getElementById("advisory-text");
   if (terminalScreen) {
-    terminalScreen.className = "terminal-text text-cyan";
+    terminalScreen.className = "speech-bubble-text";
     terminalScreen.innerText = `[AI UPLINKING...]\nEstablishing cognitive bridge...\nDownloading snark modules...`;
   }
   
@@ -604,6 +604,7 @@ RESPOND ONLY with a raw JSON object in this format (no markdown code blocks, no 
       }
       
       if (terminalScreen) {
+        terminalScreen.className = "speech-bubble-text";
         terminalScreen.innerText = parsedMessage;
       }
       
@@ -1183,6 +1184,13 @@ function renderGauges() {
   const proFloor = goals.proteinFloor;
   const proTarget = goals.proteinTarget;
   
+  // Update targets dynamically in HUD
+  const targetCalEl = document.getElementById("target-calories");
+  if (targetCalEl) targetCalEl.innerText = calFloor;
+  
+  const targetProEl = document.getElementById("target-protein");
+  if (targetProEl) targetProEl.innerText = proTarget;
+  
   // Calorie progress bar
   const calorieBar = document.getElementById("calorie-bar");
   if (calorieBar) {
@@ -1208,18 +1216,18 @@ function renderGauges() {
     }
   }
   
-  // Calorie Delta Message
+  // Calorie Delta Message (Streamlined Telemetry)
   const calDelta = document.getElementById("calorie-delta");
   if (calDelta) {
     if (totals.calories < calFloor) {
       calDelta.className = "gauge-delta text-amber";
-      calDelta.innerText = `Need ${calFloor - totals.calories} kcal more to reach minimum of ${calFloor}`;
+      calDelta.innerText = `DEFICIT: -${calFloor - totals.calories} kcal (to floor)`;
     } else if (totals.calories >= calFloor && totals.calories <= calCeil) {
       calDelta.className = "gauge-delta text-cyan";
-      calDelta.innerText = `Within target range! (${calCeil - totals.calories} kcal left before ceiling of ${calCeil})`;
+      calDelta.innerText = `OPTIMAL: -${calCeil - totals.calories} kcal remaining`;
     } else {
       calDelta.className = "gauge-delta text-crimson";
-      calDelta.innerText = `Over limit by ${totals.calories - calCeil} kcal (ceiling is ${calCeil})`;
+      calDelta.innerText = `SURPLUS: +${totals.calories - calCeil} kcal (over ceiling)`;
     }
   }
   
@@ -1246,18 +1254,18 @@ function renderGauges() {
     }
   }
   
-  // Protein Delta Message
+  // Protein Delta Message (Streamlined Telemetry)
   const proDelta = document.getElementById("protein-delta");
   if (proDelta) {
     if (totals.protein < proFloor) {
       proDelta.className = "gauge-delta text-amber";
-      proDelta.innerText = `Need ${proFloor - totals.protein}g more to reach minimum of ${proFloor}g`;
+      proDelta.innerText = `DEFICIT: -${proFloor - totals.protein}g (to floor)`;
     } else if (totals.protein >= proFloor && totals.protein < proTarget) {
       proDelta.className = "gauge-delta text-cyan";
-      proDelta.innerText = `Reached minimum! Need ${proTarget - totals.protein}g more to reach target of ${proTarget}g`;
+      proDelta.innerText = `OPTIMAL: -${proTarget - totals.protein}g remaining`;
     } else {
       proDelta.className = "gauge-delta text-cyan";
-      proDelta.innerText = `Target hit! +${totals.protein - proTarget}g surplus over ${proTarget}g`;
+      proDelta.innerText = `SURPLUS: +${totals.protein - proTarget}g (target cleared)`;
     }
   }
 }
